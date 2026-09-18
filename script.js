@@ -28,6 +28,13 @@ let currentEditingRow = null;
 
 let charts = {};
 
+/*
+ * Penanda proses simpan sedang berjalan,
+ * untuk mencegah klik ganda (double submit)
+ * mengirim dua request bersamaan ke Apps Script.
+ */
+let isSavingEdit = false;
+
 
 /* =========================================================
    HELPER DOM
@@ -698,6 +705,34 @@ async function loadFromURL(url) {
 
 
 /* =========================================================
+   URUTKAN DATA TERBARU LEBIH DULU
+========================================================= */
+
+function getSortedByDateDesc(rows) {
+
+    return [...rows].sort(
+        function(a, b) {
+
+            const dateA =
+                a.dateObject
+                    ? a.dateObject.getTime()
+                    : 0;
+
+            const dateB =
+                b.dateObject
+                    ? b.dateObject.getTime()
+                    : 0;
+
+            return (
+                dateB -
+                dateA
+            );
+        }
+    );
+}
+
+
+/* =========================================================
    RENDER DATA LAPORAN
 ========================================================= */
 
@@ -745,7 +780,13 @@ function renderLaporan() {
     }
 
 
-    DATA.forEach(
+    const sortedData =
+        getSortedByDateDesc(
+            DATA
+        );
+
+
+    sortedData.forEach(
         function(row, index) {
 
             const tr =
@@ -873,7 +914,7 @@ function renderLaporan() {
 
 
     updateResultCount(
-        DATA.length
+        sortedData.length
     );
 }
 
@@ -1500,6 +1541,18 @@ async function saveEdit(event) {
     event.preventDefault();
 
 
+    /*
+     * Cegah klik ganda: kalau proses simpan
+     * sebelumnya masih berjalan, abaikan
+     * pemanggilan berikutnya sampai selesai.
+     */
+
+    if (isSavingEdit) {
+
+        return;
+    }
+
+
     if (!currentEditingRow) {
 
         alert(
@@ -1658,6 +1711,10 @@ async function saveEdit(event) {
         saveButton.textContent =
             "Menyimpan...";
     }
+
+
+    isSavingEdit =
+        true;
 
 
     try {
@@ -1843,6 +1900,10 @@ async function saveEdit(event) {
 
     } finally {
 
+        isSavingEdit =
+            false;
+
+
         if (saveButton) {
 
             saveButton.disabled =
@@ -2004,7 +2065,13 @@ function renderFilteredLaporan(
     }
 
 
-    filteredRows.forEach(
+    const sortedRows =
+        getSortedByDateDesc(
+            filteredRows
+        );
+
+
+    sortedRows.forEach(
         function(row, index) {
 
             const tr =
@@ -2104,7 +2171,7 @@ function renderFilteredLaporan(
 
 
     updateResultCount(
-        filteredRows.length
+        sortedRows.length
     );
 }
 
