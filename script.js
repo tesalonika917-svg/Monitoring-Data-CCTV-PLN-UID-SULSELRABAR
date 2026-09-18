@@ -979,7 +979,13 @@ function renderMonitoring() {
     }
 
 
-    DATA.forEach(
+    const sortedMonitoring =
+        getSortedByDateDesc(
+            DATA
+        );
+
+
+    sortedMonitoring.forEach(
         function(row, index) {
 
             const tr =
@@ -3796,7 +3802,13 @@ document.addEventListener(
                     tbody.innerHTML = "";
 
 
-                    filtered.forEach(
+                    const sortedFiltered =
+                        getSortedByDateDesc(
+                            filtered
+                        );
+
+
+                    sortedFiltered.forEach(
                         function(row, index) {
 
                             const tr =
